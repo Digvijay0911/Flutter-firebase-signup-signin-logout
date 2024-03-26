@@ -4,6 +4,7 @@ import 'package:firebase_signup_signin/views/home_screen.dart';
 import 'package:firebase_signup_signin/views/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Signup_Screen extends StatefulWidget {
   const Signup_Screen({super.key});
@@ -56,6 +57,35 @@ class _Signup_ScreenState extends State<Signup_Screen> {
     } else {
       print("Some error happend");
       // showToast(message: "Some error happend");
+    }
+  }
+
+  // Signin with google:
+
+  googleLogin() async {
+    print("googleLogin method Called");
+    GoogleSignIn _googleSignIn = GoogleSignIn();
+    try {
+      var reslut = await _googleSignIn.signIn();
+      if (reslut == null) {
+        return;
+      }
+
+      final userData = await reslut.authentication;
+      final credential = GoogleAuthProvider.credential(
+          accessToken: userData.accessToken, idToken: userData.idToken);
+      var finalResult =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      print("Result $reslut");
+      print(reslut.displayName);
+      print(reslut.email);
+      print(reslut.photoUrl);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (BuildContext context) => Home_Screen()),
+          (Route<dynamic> route) => false);
+    } catch (error) {
+      print(error);
     }
   }
 
@@ -241,10 +271,15 @@ class _Signup_ScreenState extends State<Signup_Screen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Image.asset(
-                            "assets/images/google.png",
-                            height: 40,
-                            width: 40,
+                          InkWell(
+                            onTap: () {
+                              googleLogin();
+                            },
+                            child: Image.asset(
+                              "assets/images/google.png",
+                              height: 40,
+                              width: 40,
+                            ),
                           ),
                           Image.asset(
                             "assets/images/apple-logo.png",
